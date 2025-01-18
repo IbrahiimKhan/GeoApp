@@ -8,6 +8,7 @@ import {
   SafeAreaView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
@@ -87,7 +88,9 @@ const HomeScreen = (): ReactElement => {
   }, []);
 
   const renderMapItem = ({ item }: { item: any }) => (
-    <View style={styles.mapItemContainer}>
+    <TouchableOpacity style={styles.mapItemContainer}
+    onPress={() => navigation.navigate('Map', {location:userLocation,fench:item?.coordinates})}
+    >
       <View style={styles.imageContainer}>
         <Image
           source={{
@@ -98,8 +101,10 @@ const HomeScreen = (): ReactElement => {
         />
       </View>
       <Text style={styles.mapItemText}>{item.name || 'Unnamed Map'}</Text>
-    </View>
+    </TouchableOpacity>
   );
+
+  console.log(savedMaps);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -114,7 +119,7 @@ const HomeScreen = (): ReactElement => {
         />
         <Pressable
           style={styles.addButton}
-          onPress={() => navigation.navigate('Map', userLocation)}
+          onPress={() => navigation.navigate('Map', {location:userLocation})}
         >
           <Text style={styles.addButtonText}>Add New Map</Text>
         </Pressable>
