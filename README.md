@@ -1,4 +1,4 @@
-# inforamtion
+# GeoApp
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ yarn
 ```
 
 
-To start Metro, run the following command from the _root_ of your my-care-mobile project dir:
+To start Metro, run the following command from the _root_ of your  project dir:
 
 ```bash
 yarn start
@@ -37,7 +37,7 @@ yarn pod
 
 #### Step 2: Start your Application
 
-Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your my-care-mobile project dir. Run the following command to start your _Android_ or _iOS_ app:
+Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _root_ of your project dir. Run the following command to start your _Android_ or _iOS_ app:
 
 #### For Android
 
