@@ -46,7 +46,6 @@ const HomeScreen = (): ReactElement => {
     if (Platform.OS === 'android') {
       try {
       const enabled =  await promptForEnableLocationIfNeeded();
-      console.log(enabled);
       if (enabled) {
        await requestLocationPermission();
       }
