@@ -40,6 +40,8 @@ export default function MapScreen({ route }: MapScreenProps) {
     ...INITIAL_REGION,
     ...route?.params,
   });
+
+
   const [fence, setFence] = useState<Coordinate[]>([]);
   const dropDownColors = Object.entries(colors).map(([_index, value]) => ({
     title: value,

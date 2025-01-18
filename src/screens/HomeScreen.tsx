@@ -19,10 +19,72 @@ import { safeWidth } from '../constants/layout';
 import { promptForEnableLocationIfNeeded } from 'react-native-android-location-enabler';
 import Geolocation from '@react-native-community/geolocation';
 
+type Location = {
+  longitude: number;
+  latitude: number;
+};
+
 const HomeScreen = (): ReactElement => {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const savedMaps = useSelector((state: any) => state.geoFence.savedMaps);
-  const [userLoation, setUserLoation] = useState<{longitude:number,latitude:number}>({longitude:0,latitude:0});
+  const [userLocation, setUserLocation] = useState<Location>({
+    longitude: 0,
+    latitude: 0,
+  });
+
+  const fetchCurrentLocation = async () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        const { latitude, longitude } = position.coords;
+        setUserLocation({ latitude, longitude });
+      },
+      error => console.error('Error getting location', error)
+    );
+  };
+
+  const requestLocationPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location Permission',
+          message: 'This app needs access to your location.',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        }
+      );
+
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        fetchCurrentLocation();
+      } else {
+        console.warn('Location permission denied');
+      }
+    } else {
+      Geolocation.requestAuthorization();
+      fetchCurrentLocation();
+    }
+  };
+
+  const enableLocationIfNeeded = async () => {
+    try {
+      if (Platform.OS === 'android') {
+        const enabled = await promptForEnableLocationIfNeeded();
+        if (enabled) {
+          await requestLocationPermission();
+        }
+      } else {
+        Geolocation.requestAuthorization();
+        fetchCurrentLocation();
+      }
+    } catch (error) {
+      console.error('Error enabling location', error);
+    }
+  };
+
+  useEffect(() => {
+    enableLocationIfNeeded();
+  }, []);
 
   const renderMapItem = ({ item }: { item: any }) => (
     <View style={styles.mapItemContainer}>
@@ -39,67 +101,6 @@ const HomeScreen = (): ReactElement => {
     </View>
   );
 
-
-
-
-  const   handleEnabledLocation = async() =>{
-    if (Platform.OS === 'android') {
-      try {
-      const enabled =  await promptForEnableLocationIfNeeded();
-      if (enabled) {
-       await requestLocationPermission();
-      }
-      } catch (error: unknown) {
-        if (error instanceof Error) {
-           console.log('something went wrong');
-        }
-      }
-    }
-  };
-
-
-   const requestLocationPermission = async () => {
-    if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
-            PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-            {
-                title: 'Location Permission',
-                message: 'This app needs access to your location.',
-                buttonNeutral: 'Ask Me Later',
-                buttonNegative: 'Cancel',
-                buttonPositive: 'OK',
-            }
-        );
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-            getCurrentLocation();
-        } else {
-            console.log('Location permission denied');
-        }
-    } else {
-        getCurrentLocation();
-    }
-  };
-
-
-   const getCurrentLocation = () => {
-    Geolocation.getCurrentPosition(
-        (position) => {
-            const { latitude, longitude } = position.coords;
-           setUserLoation({latitude,longitude});
-        },
-        (error) => {
-          console.log('Error getting location',error);
-        },
-    );
-  };
-
-
-  useEffect(() => {
-   handleEnabledLocation();
-  }, []);
-
-
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -107,9 +108,14 @@ const HomeScreen = (): ReactElement => {
           data={savedMaps}
           keyExtractor={(item, index) => index.toString()}
           renderItem={renderMapItem}
-          ListEmptyComponent={<Text style={styles.emptyText}>No saved maps yet.</Text>}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>No saved maps yet.</Text>
+          }
         />
-        <Pressable style={styles.addButton} onPress={() => navigation.navigate('Map',userLoation)}>
+        <Pressable
+          style={styles.addButton}
+          onPress={() => navigation.navigate('Map', userLocation)}
+        >
           <Text style={styles.addButtonText}>Add New Map</Text>
         </Pressable>
       </View>
@@ -125,7 +131,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.light,
-    paddingBottom:10,
+    paddingBottom: 10,
   },
   content: {
     width: '100%',
