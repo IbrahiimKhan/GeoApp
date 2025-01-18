@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
-import { View, Button, StyleSheet } from 'react-native';
-import MapView, { Polygon, Marker, Region, MapPressEvent } from 'react-native-maps';
-import { useDispatch } from 'react-redux';
-import { saveMap } from '../store/store';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { RootStackParamList } from '../types/navigation';
+import React, {useState} from 'react';
+import {View, Button, StyleSheet, Text, SafeAreaView, Pressable} from 'react-native';
+import MapView, {
+  Polygon,
+  Marker,
+  Region,
+  MapPressEvent,
+} from 'react-native-maps';
+import {useDispatch} from 'react-redux';
+import {saveMap} from '../store/store';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../types/navigation';
+import SelectDropdown from 'react-native-select-dropdown';
+import {theme} from '../theme';
+import {colors} from '../constants/colors';
+import { deviceWidth, safeWidth } from '../constants/layout';
 
 interface Coordinate {
   latitude: number;
@@ -22,43 +31,109 @@ export default function MapScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const [region, setRegion] = useState<Region>(INITIAL_REGION);
   const [fence, setFence] = useState<Coordinate[]>([]);
+  const dropDownColors = Object.entries(colors).map(([_index, value]) => ({
+    title: value,
+  }));
+  const [color, setcolor] = useState(dropDownColors[0]);
 
   const dispatch = useDispatch();
 
   const handleMapPress = (event: MapPressEvent) => {
-    const { coordinate } = event.nativeEvent;
-    setFence((prevFence) => [...prevFence, coordinate]);
+    const {coordinate} = event.nativeEvent;
+    setFence(prevFence => [...prevFence, coordinate]);
   };
 
   const handleSave = () => {
     if (fence.length === 0) {
       return;
     }
-    dispatch(saveMap({ name: `Fence ${Date.now()}`, coordinates: fence }));
+    dispatch(saveMap({name: `Fence ${Date.now()}`, coordinates: fence}));
     navigation.goBack();
   };
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <MapView
         style={styles.map}
         region={region}
         onRegionChangeComplete={setRegion}
-        onPress={handleMapPress}
-      >
+        onPress={handleMapPress}>
         {fence.length > 0 && (
-          <Polygon coordinates={fence} fillColor="rgba(0, 150, 136, 0.5)" />
+          <Polygon coordinates={fence} fillColor={color?.title} />
         )}
         {fence.map((point, index) => (
           <Marker key={index} coordinate={point} />
         ))}
       </MapView>
-      <Button title="Save GeoFence" onPress={handleSave} />
-    </View>
+
+          <Pressable style={styles.btn} onPress={handleSave}>
+                  <Text style={styles.btnText}>Save This Map</Text>
+                </Pressable>
+        <SelectDropdown
+          data={dropDownColors}
+          onSelect={selectedItem => {
+            setcolor(selectedItem);
+          }}
+          renderButton={selectedItem => {
+            return (
+              <View style={styles.btn}>
+                <Text style={styles.btnText}>
+                  {(selectedItem && selectedItem.title) ||
+                    'Choose Fill Color'}
+                </Text>
+              </View>
+            );
+          }}
+          renderItem={(item, index, isSelected) => {
+            return (
+              <View
+                style={{
+                  ...styles.pickerItems,
+                  ...(isSelected && {backgroundColor: '#D2D9DF'}),
+                }}>
+                <Text>{item.title}</Text>
+              </View>
+            );
+          }}
+          showsVerticalScrollIndicator={false}
+        />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-  map: { flex: 1 },
+  container: {flex: 1,paddingBottom:10},
+  map: {flex: 1},
+  pickerItems: {
+    padding: theme.spacing[8],
+    width:deviceWidth,
+    top:0,
+  },
+  dropdown: {
+    backgroundColor: colors.primary,
+  },
+  actionContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-evenly',
+  },
+  btn: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: theme.spacing[4],
+    paddingHorizontal: theme.spacing[6],
+    borderRadius: theme.spacing[4],
+    backgroundColor: colors.primary,
+    ...theme.shadows.light,
+    marginTop: theme.spacing[4],
+    width:safeWidth,
+  },
+  btnText: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+  },
 });

@@ -59,9 +59,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: colors.light,
+    paddingBottom:10,
   },
   content: {
-    flex: 1,
     width: '100%',
     paddingHorizontal: theme.spacing[4],
   },
