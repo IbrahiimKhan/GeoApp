@@ -1,19 +1,19 @@
-import React, {useState} from 'react';
-import {View, Button, StyleSheet, Text, SafeAreaView, Pressable} from 'react-native';
+import { NavigationProp, useNavigation } from '@react-navigation/native';
+import React, { useState } from 'react';
+import { Pressable, SafeAreaView, StyleSheet, Text, View } from 'react-native';
 import MapView, {
-  Polygon,
-  Marker,
-  Region,
   MapPressEvent,
+  Marker,
+  Polygon,
+  Region,
 } from 'react-native-maps';
-import {useDispatch} from 'react-redux';
-import {saveMap} from '../store/store';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
-import {RootStackParamList} from '../types/navigation';
 import SelectDropdown from 'react-native-select-dropdown';
-import {theme} from '../theme';
-import {colors} from '../constants/colors';
+import { useDispatch } from 'react-redux';
+import { colors } from '../constants/colors';
 import { deviceWidth, safeWidth } from '../constants/layout';
+import { saveMap } from '../store/store';
+import { theme } from '../theme';
+import { RootStackParamList } from '../types/navigation';
 
 interface Coordinate {
   latitude: number;
@@ -27,9 +27,19 @@ const INITIAL_REGION: Region = {
   longitudeDelta: 0.0421,
 };
 
-export default function MapScreen() {
+
+import { RouteProp } from '@react-navigation/native';
+
+interface MapScreenProps {
+  route: RouteProp<RootStackParamList, 'Map'>;
+}
+
+export default function MapScreen({ route }: MapScreenProps) {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const [region, setRegion] = useState<Region>(INITIAL_REGION);
+  const [region, setRegion] = useState<Region>({
+    ...INITIAL_REGION,
+    ...route?.params,
+  });
   const [fence, setFence] = useState<Coordinate[]>([]);
   const dropDownColors = Object.entries(colors).map(([_index, value]) => ({
     title: value,

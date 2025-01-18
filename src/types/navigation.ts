@@ -2,7 +2,7 @@
 
     export type RootStackParamList = {
         Home: undefined;
-        Map: undefined; // Add any parameters if needed
+        Map: {longitude:number,latitude:number};
     };
 
     export type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'Home'>;
