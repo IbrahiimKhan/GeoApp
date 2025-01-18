@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   Pressable,
@@ -8,16 +8,25 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import MapView, { MapPressEvent, Marker, Polygon, Region } from 'react-native-maps';
+import MapView, {
+  MapPressEvent,
+  Marker,
+  Polygon,
+  Region,
+} from 'react-native-maps';
 import SelectDropdown from 'react-native-select-dropdown';
-import { useDispatch } from 'react-redux';
-import { NavigationProp, RouteProp, useNavigation } from '@react-navigation/native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { colors } from '../constants/colors';
-import { deviceWidth, safeWidth } from '../constants/layout';
-import { saveMap } from '../store/store';
-import { theme } from '../theme';
-import { RootStackParamList } from '../types/navigation';
+import {useDispatch} from 'react-redux';
+import {
+  NavigationProp,
+  RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
+import {useSafeAreaInsets} from 'react-native-safe-area-context';
+import {colors} from '../constants/colors';
+import {deviceWidth, safeWidth} from '../constants/layout';
+import {theme} from '../theme';
+import {RootStackParamList} from '../types/navigation';
+import {saveMap} from '../store/slice/geoFenceSlice';
 
 interface Coordinate {
   latitude: number;
@@ -35,18 +44,17 @@ interface MapScreenProps {
   route: RouteProp<RootStackParamList, 'Map'>;
 }
 
-export default function MapScreen({ route }: MapScreenProps) {
+export default function MapScreen({route}: MapScreenProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const dispatch = useDispatch();
-
   const [region, setRegion] = useState<Region>({
     ...INITIAL_REGION,
     ...route?.params?.location,
   });
 
   const [fence, setFence] = useState<Coordinate[]>(
-    route?.params?.fench?.length ? route.params.fench : []
+    route?.params?.fench?.length ? route.params.fench : [],
   );
 
   const dropDownColors = Object.entries(colors).map(([, value]) => ({
@@ -56,13 +64,20 @@ export default function MapScreen({ route }: MapScreenProps) {
   const [color, setColor] = useState(dropDownColors[0]);
 
   const handleMapPress = (event: MapPressEvent) => {
-    const { coordinate } = event.nativeEvent;
-    setFence((prevFence) => [...prevFence, coordinate]);
+    const {coordinate} = event.nativeEvent;
+    setFence(prevFence => [...prevFence, coordinate]);
   };
 
   const handleSave = () => {
-    if (fence.length === 0) {return;}
-    dispatch(saveMap({ name: `Fence ${Date.now()}`, coordinates: fence }));
+    if (fence.length === 0) {
+      return;
+    }
+    const newMap = {
+      id: route?.params?.id ? route?.params?.id : Math.random(),
+      name: `Fence ${Date.now()}`,
+      coordinates: fence,
+    };
+    dispatch(saveMap(newMap));
     navigation.goBack();
   };
 
@@ -70,11 +85,12 @@ export default function MapScreen({ route }: MapScreenProps) {
     <SafeAreaView style={styles.container}>
       <TouchableOpacity
         onPress={navigation.goBack}
-        style={[styles.arrowContainer, { top: insets.top }]}
-      >
+        style={[styles.arrowContainer, {top: insets.top}]}>
         <Image
           style={styles.backArrow}
-          source={{ uri: 'https://cdn-icons-png.freepik.com/256/7945/7945195.png?semt=ais_hybrid' }}
+          source={{
+            uri: 'https://cdn-icons-png.freepik.com/256/7945/7945195.png?semt=ais_hybrid',
+          }}
         />
       </TouchableOpacity>
 
@@ -82,8 +98,7 @@ export default function MapScreen({ route }: MapScreenProps) {
         style={styles.map}
         region={region}
         onRegionChangeComplete={setRegion}
-        onPress={handleMapPress}
-      >
+        onPress={handleMapPress}>
         {fence.length > 0 && (
           <Polygon coordinates={fence} fillColor={color?.title} />
         )}
@@ -98,8 +113,8 @@ export default function MapScreen({ route }: MapScreenProps) {
 
       <SelectDropdown
         data={dropDownColors}
-        onSelect={(selectedItem) => setColor(selectedItem)}
-        renderButton={(selectedItem) => (
+        onSelect={selectedItem => setColor(selectedItem)}
+        renderButton={selectedItem => (
           <View style={styles.btn}>
             <Text style={styles.btnText}>
               {selectedItem?.title || 'Choose fench Color'}
@@ -110,9 +125,8 @@ export default function MapScreen({ route }: MapScreenProps) {
           <View
             style={{
               ...styles.pickerItems,
-              ...(isSelected && { backgroundColor: '#D2D9DF' }),
-            }}
-          >
+              ...(isSelected && {backgroundColor: '#D2D9DF'}),
+            }}>
             <Text>{item.title}</Text>
           </View>
         )}

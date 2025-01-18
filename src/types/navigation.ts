@@ -4,7 +4,7 @@
         Home: undefined;
         Map: {location:{
             longitude:number,latitude:number
-        },fench?:any[]};
+        },fench?:any[],id?:number};
     };
 
     export type HomeScreenNavigationProp = NavigationProp<RootStackParamList, 'Home'>;

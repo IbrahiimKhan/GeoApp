@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, {ReactElement, useEffect, useState} from 'react';
 import {
   FlatList,
   Image,
@@ -11,13 +11,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { NavigationProp, useNavigation } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
-import { colors } from '../constants/colors';
-import { theme } from '../theme';
-import { RootStackParamList } from '../types/navigation';
-import { safeWidth } from '../constants/layout';
-import { promptForEnableLocationIfNeeded } from 'react-native-android-location-enabler';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {useSelector} from 'react-redux';
+import {colors} from '../constants/colors';
+import {theme} from '../theme';
+import {RootStackParamList} from '../types/navigation';
+import {safeWidth} from '../constants/layout';
+import {promptForEnableLocationIfNeeded} from 'react-native-android-location-enabler';
 import Geolocation from '@react-native-community/geolocation';
 
 type Location = {
@@ -36,10 +36,10 @@ const HomeScreen = (): ReactElement => {
   const fetchCurrentLocation = async () => {
     Geolocation.getCurrentPosition(
       position => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ latitude, longitude });
+        const {latitude, longitude} = position.coords;
+        setUserLocation({latitude, longitude});
       },
-      error => console.error('Error getting location', error)
+      error => console.error('Error getting location', error),
     );
   };
 
@@ -53,7 +53,7 @@ const HomeScreen = (): ReactElement => {
           buttonNeutral: 'Ask Me Later',
           buttonNegative: 'Cancel',
           buttonPositive: 'OK',
-        }
+        },
       );
 
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
@@ -87,10 +87,16 @@ const HomeScreen = (): ReactElement => {
     enableLocationIfNeeded();
   }, []);
 
-  const renderMapItem = ({ item }: { item: any }) => (
-    <TouchableOpacity style={styles.mapItemContainer}
-    onPress={() => navigation.navigate('Map', {location:userLocation,fench:item?.coordinates})}
-    >
+  const renderMapItem = ({item}: {item: any}) => (
+    <TouchableOpacity
+      style={styles.mapItemContainer}
+      onPress={() =>
+        navigation.navigate('Map', {
+          location: userLocation,
+          fench: item?.coordinates,
+          id: item?.id,
+        })
+      }>
       <View style={styles.imageContainer}>
         <Image
           source={{
@@ -104,7 +110,6 @@ const HomeScreen = (): ReactElement => {
     </TouchableOpacity>
   );
 
-  console.log(savedMaps);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -119,8 +124,7 @@ const HomeScreen = (): ReactElement => {
         />
         <Pressable
           style={styles.addButton}
-          onPress={() => navigation.navigate('Map', {location:userLocation})}
-        >
+          onPress={() => navigation.navigate('Map', {location: userLocation})}>
           <Text style={styles.addButtonText}>Add New Map</Text>
         </Pressable>
       </View>
